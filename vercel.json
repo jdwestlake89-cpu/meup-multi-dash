@@ -1,0 +1,8 @@
+{
+  "env": {
+    "NEXT_PUBLIC_N8N_BASE": "@n8n_base",
+    "NEXT_PUBLIC_N8N_WEBHOOK_BASE": "@n8n_webhook_base"
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next"
+}
