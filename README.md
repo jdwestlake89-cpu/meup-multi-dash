@@ -19,19 +19,8 @@ This system utilizes a modular "Data-Table-as-Source" pattern to ensure consiste
 
 The backbone of the system consists of three primary data schemas:
 
-- **compliance_credentials**: Tracks holder, ID, and expiry lifecycle.
-- **bids_invoices**: Financial records with automated VRO reserve calculations.
-- **scope_of_work**: Stores project requirements and material estimates.
-
-## Key Design Principles
-
-1. **Modular Isolation**: Each workflow operates independently, allowing for granular debugging and scaling without system-wide downtime.
-2. **Deterministic Logic**: Business rules (like the 10% VRO reserve split) are enforced at the pipeline level before data ingestion.
-3. **Human-in-the-Loop**: Critical milestones, such as contract gating and financial disbursement, are designed as external dependencies, keeping the automation layer focused on data integrity.
-
-## Data Schemas
-
 ### compliance_credentials
+Tracks holder, ID, and expiry lifecycle.
 ```json
 {
   "id": "UUID",
@@ -45,6 +34,7 @@ The backbone of the system consists of three primary data schemas:
 ```
 
 ### bids_invoices
+Financial records with automated VRO reserve calculations.
 ```json
 {
   "id": "UUID",
@@ -62,6 +52,7 @@ The backbone of the system consists of three primary data schemas:
 ```
 
 ### scope_of_work
+Stores project requirements and material estimates.
 ```json
 {
   "id": "UUID",
@@ -73,72 +64,57 @@ The backbone of the system consists of three primary data schemas:
 }
 ```
 
-## Frontend Architecture
+## Key Design Principles
 
-The frontend is built with **Next.js 14 + TypeScript** and communicates with n8n via:
-- **REST API polling** (SWR, 30s intervals) for real-time data table views
-- **Form submission** via embedded n8n form endpoints
-- **iFrame embedding** for SOW and Bidding forms
-
-### Dashboard Components
-
-- **ComplianceView**: Real-time credential table with expiry status badges
-- **BiddingView**: Bid/invoice creation form + VRO split display
-- **ScopeOfWorkView**: Job-site image upload + automated SOW preview
-- **SMSAssistantView**: Crew messaging interface (Twilio integration placeholder)
+1. **Modular Isolation**: Each workflow operates independently, allowing for granular debugging and scaling without system-wide downtime.
+2. **Deterministic Logic**: Business rules (like the 10% VRO reserve split) are enforced at the pipeline level before data ingestion.
+3. **Human-in-the-Loop**: Critical milestones, such as contract gating and financial disbursement, are designed as external dependencies, keeping the automation layer focused on data integrity.
 
 ## Deployment Strategy
 
-The system is built as a headless automation backend. Frontend interfaces interact directly with these endpoints via secure webhooks and form submission triggers.
+The system is built as a headless automation backend. Frontend interfaces (Google App Builder or custom UI) interact directly with these endpoints via secure webhooks and form submission triggers.
 
-### n8n Deployment
-- Base URL: `https://jdwestlake89.app.n8n.cloud`
-- Form endpoints:
-  - `/form/multidash-sow`
-  - `/form/multidash-billing`
-- Data API: `/api/v1/db/tables/{tableName}/rows`
+### MEUP Multi-Dash Frontend
 
-### Next.js Frontend Deployment
-- **Vercel** (recommended): `vercel deploy`
-- Environment variables (from `.env.local`):
-  ```
-  NEXT_PUBLIC_N8N_BASE=https://jdwestlake89.app.n8n.cloud
-  NEXT_PUBLIC_N8N_WEBHOOK_BASE=https://jdwestlake89.app.n8n.cloud/webhook
-  ```
+Next.js + TypeScript real-time dashboard for Multi-Dash Maintenance LLC operations.
+
+## Features
+
+- **Real-time Dashboard**: Live views of compliance credentials, bids/invoicing, and scope of work
+- **Form Integration**: Embedded n8n forms for SOW generation, bidding, and compliance tracking
+- **Crew Authentication**: Role-based access (admin, manager, crew)
+- **SMS AI Assistant**: Field-ops assistant via Twilio (setup required)
+- **Data Polling**: SWR-powered polling of n8n data tables every 30 seconds
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- n8n instance at https://jdwestlake89.app.n8n.cloud
-- Vercel account (for production deployment)
+- n8n instance running at https://jdwestlake89.app.n8n.cloud
+- Vercel account (for deployment)
 
-### Development
+### Installation
 
 ```bash
-git clone https://github.com/jdwestlake89-cpu/meup-multi-dash
-cd meup-multi-dash
 npm install
-cp .env.example .env.local
-npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+## Pro-Tip for Copilot
 
-### Production Deployment
+When you have this in your repository, you can ask Copilot:
+> *"Based on the README.md, suggest a schema validation script for the bids_invoices table to ensure the VRO split calculation is always accurate before it hits the database."*
 
-```bash
-npm run build
-npm start
-```
+It will immediately understand your architecture and provide specific code to match your existing logic.
 
-For Vercel:
-```bash
-npm install -g vercel
-vercel
-```
+---
 
-## Integration Points
+### n8n Integration Details
+
+- **Base URL**: `https://jdwestlake89.app.n8n.cloud`
+- **Form endpoints**:
+  - `/form/multidash-sow`
+  - `/form/multidash-billing`
+- **Data API**: `/api/v1/db/tables/{tableName}/rows`
 
 ### Compliance Watchdog → Gmail
 - **Trigger**: Daily at 8:00 AM
@@ -159,35 +135,3 @@ vercel
 - **Trigger**: Inbound SMS to crew number
 - **Logic**: Gemini interprets message, queries relevant tables, generates reply
 - **Output**: SMS reply to crew member (conversation memory per phone number)
-
-## Pro Tips for Extending
-
-### Add Schema Validation
-Ask Copilot:
-> *"Based on the README.md, suggest a schema validation script for the bids_invoices table to ensure the VRO split calculation is always accurate before it hits the database."*
-
-### Add Data Export
-```bash
-# Export compliance_credentials to CSV
-GET /api/v1/db/tables/compliance_credentials/rows?format=csv
-```
-
-### Add Real-Time Updates
-Upgrade from SWR polling to WebSocket:
-```typescript
-// Replace SWR with native fetch + setInterval
-const ws = new WebSocket('wss://jdwestlake89.app.n8n.cloud/webhook/watch');
-```
-
-## Notes
-
-- **Authentication**: Currently mocked (localStorage). Wire to n8n API key or external auth provider (Firebase, Auth0).
-- **Real-time**: Polling uses SWR (30s intervals). Upgrade to WebSocket for true real-time if latency is critical.
-- **Financial Movement**: VRO split is reference-only. Actual fund movement requires Stripe/Plaid integration (outside n8n scope).
-- **Hard Lock**: Contract gating (blocking new contracts when credentials lapse) is designed as external rule in contract intake system, not in n8n.
-
-## Support & Troubleshooting
-
-- **n8n logs**: Check workflow execution history in n8n dashboard
-- **Frontend errors**: Browser console + Next.js server logs
-- **Data consistency**: Audit `compliance_credentials`, `bids_invoices`, `scope_of_work` tables directly in n8n Data Tables view
