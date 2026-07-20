@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Globe } from 'lucide-react';
+import { Globe, Clock } from 'lucide-react';
 
 interface TimeZoneDisplay {
   name: string;
@@ -54,33 +54,44 @@ export default function TimeZoneClockWidget() {
   if (!mounted) return null;
 
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-2 mb-4">
-        <Globe size={20} className="text-blue-600" />
-        <h2 className="text-lg font-semibold text-slate-900">World Clock</h2>
+    <div className="w-full space-y-4">
+      {/* Widget Header */}
+      <div className="structural-card p-6 rounded-lg relative overflow-hidden">
+        <div className="scanline"></div>
+        <div className="flex items-center gap-2 mb-2">
+          <Globe size={18} className="text-[#ff6b00]" />
+          <h2 className="text-base font-mono font-bold text-[#ffb693] tracking-wider uppercase">
+            WORLD_CLOCK_RESYNC
+          </h2>
+        </div>
+        <p className="text-xs text-[#e2bfb0]">
+          Active temporal synchronization across global nodes. Updates every 1000ms.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {TIME_ZONES.map(({ name, label, offset }) => (
+      {/* Clocks Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {TIME_ZONES.slice(0, 4).map(({ name, label, offset }) => (
           <div
             key={name}
-            className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 shadow-sm"
+            className="structural-card p-4 rounded-lg relative overflow-hidden flex flex-col justify-between"
           >
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-start">
               <div>
-                <p className="font-semibold text-slate-900 text-sm">{label}</p>
-                <p className="text-xs text-slate-600">{offset}</p>
+                <p className="font-mono text-xs font-bold text-[#e3e2e7]">{label}</p>
+                <p className="font-mono text-[9px] text-[#a98a7d] uppercase">{offset}</p>
               </div>
+              <Clock className="h-3.5 w-3.5 text-[#ffb693]/40" />
             </div>
-            <p className="text-2xl font-mono font-bold text-blue-900 tracking-wider">
+            <p className="text-xl font-mono font-bold text-[#ff6b00] tracking-widest mt-3">
               {times[name] || '--:--:--'}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 text-xs text-slate-500 text-center">
-        <p>Updates every second • Multi-Dash crew coordination</p>
+      <div className="text-center font-mono text-[10px] text-[#a98a7d] pt-1">
+        GLOBAL_TEMPORAL_COORDINATION_LOCK_OK
       </div>
     </div>
   );
