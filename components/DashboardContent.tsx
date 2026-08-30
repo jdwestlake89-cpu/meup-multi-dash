@@ -4,10 +4,11 @@ import { useState } from 'react';
 import ComplianceView from './views/ComplianceView';
 import BiddingView from './views/BiddingView';
 import ScopeOfWorkView from './views/ScopeOfWorkView';
+import MarketingFlyerView from './views/MarketingFlyerView';
 import TimeZoneClock from './widgets/TimeZoneClock';
-import { ClipboardList, FileText, CheckSquare, Send, Clock } from 'lucide-react';
+import { ClipboardList, FileText, CheckSquare, Send, Clock, Megaphone } from 'lucide-react';
 
-type TabType = 'compliance' | 'bidding' | 'sow' | 'sms' | 'clock';
+type TabType = 'compliance' | 'bidding' | 'sow' | 'flyer' | 'sms' | 'clock';
 
 export default function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabType>('compliance');
@@ -16,6 +17,7 @@ export default function DashboardContent() {
     { id: 'compliance', label: 'Compliance', icon: <CheckSquare size={18} /> },
     { id: 'bidding', label: 'Bidding & Invoicing', icon: <FileText size={18} /> },
     { id: 'sow', label: 'Scope of Work', icon: <ClipboardList size={18} /> },
+    { id: 'flyer', label: 'Marketing Flyer', icon: <Megaphone size={18} /> },
     { id: 'sms', label: 'SMS Assistant', icon: <Send size={18} /> },
     { id: 'clock', label: 'World Clock', icon: <Clock size={18} /> },
   ];
@@ -43,6 +45,7 @@ export default function DashboardContent() {
         {activeTab === 'compliance' && <ComplianceView />}
         {activeTab === 'bidding' && <BiddingView />}
         {activeTab === 'sow' && <ScopeOfWorkView />}
+        {activeTab === 'flyer' && <MarketingFlyerView />}
         {activeTab === 'sms' && <SMSAssistantView />}
         {activeTab === 'clock' && <TimeZoneClock />}
       </div>
